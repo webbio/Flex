@@ -1,8 +1,8 @@
-defmodule Elastic.HTTP do
+defmodule Flex.HTTP do
   use HTTPoison.Base
 
   def process_url(url) do
-    "http://127.0.0.1:9200" <> url
+    "http://elasticsearch:9200" <> url
   end
 
   def process_response_body(""), do: ""

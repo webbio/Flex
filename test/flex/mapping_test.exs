@@ -1,6 +1,6 @@
-defmodule Elastic.MappingTest do
+defmodule Flex.MappingTest do
   use ExUnit.Case
-  alias Elastic.{Index, Mapping}
+  alias Flex.{Index, Mapping}
   doctest Mapping
 
   setup do

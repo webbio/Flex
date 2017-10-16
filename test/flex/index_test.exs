@@ -1,6 +1,6 @@
-defmodule Elastic.IndexTest do
+defmodule Flex.IndexTest do
   use ExUnit.Case
-  alias Elastic.Index
+  alias Flex.Index
   doctest Index
 
   setup do

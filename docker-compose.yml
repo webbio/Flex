@@ -1,0 +1,21 @@
+version: '3'
+services:
+  elastic:
+    build: ../elastic
+    depends_on:
+      - elasticsearch
+      - postgres
+    environment:
+      - MIX_ENV=test
+    command: /bin/sh -c "mix deps.get && iex --sname x --cookie elastic -S mix"
+    hostname: elastic
+    ports:
+      - "4000:4000"
+    volumes:
+      - .:/usr/src/app
+  elasticsearch:
+    image: elasticsearch
+  postgres:
+    image: postgres:9.6
+    ports:
+      - "5432:5432"

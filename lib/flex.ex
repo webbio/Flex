@@ -1,6 +1,6 @@
-defmodule Elastic do
+defmodule Flex do
   @moduledoc """
-  Documentation for Elastic.
+  Documentation for Flex.
   """
 
   @doc false

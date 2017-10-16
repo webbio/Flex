@@ -1,8 +1,8 @@
-defmodule Elastic.Mapping do
+defmodule Flex.Mapping do
   @moduledoc """
   This module provides an interface for working with mappings
   """
-  alias Elastic.API
+  alias Flex.API
 
 
   @doc """
@@ -15,15 +15,15 @@ defmodule Elastic.Mapping do
      ...>     %{type: "text"}
      ...>    }
      ...> }
-     ...> Elastic.Mapping.put "elastic_test_index", mappings
+     ...> Flex.Mapping.put "elastic_test_index", mappings
      {:ok, %{"acknowledged" => true}}
      iex> more_mappings = %{properties:
      ...>   %{age:
      ...>     %{type: "integer"}
      ...>    }
      ...> }
-     ...> Elastic.Mapping.put "elastic_test_index", more_mappings
-     iex> Elastic.Mapping.get "elastic_test_index"
+     ...> Flex.Mapping.put "elastic_test_index", more_mappings
+     iex> Flex.Mapping.get "elastic_test_index"
      {:ok, %{"properties" => %{ "name" => %{"type" => "text"}, "age" => %{"type" => "integer"} } }}
   """
   def put(index, %{} = mappings) do
@@ -40,8 +40,8 @@ defmodule Elastic.Mapping do
      ...>     %{type: "text"}
      ...>    }
      ...> }
-     ...> Elastic.Mapping.put "elastic_test_index", mappings
-     iex> Elastic.Mapping.get "elastic_test_index"
+     ...> Flex.Mapping.put "elastic_test_index", mappings
+     iex> Flex.Mapping.get "elastic_test_index"
      {:ok, %{"properties" => %{"name" => %{"type" => "text"} } }}
   """
   def get(index) do

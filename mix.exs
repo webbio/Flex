@@ -1,4 +1,4 @@
-defmodule Elastic.Mixfile do
+defmodule Flex.Mixfile do
   use Mix.Project
 
   def project do
@@ -15,7 +15,7 @@ defmodule Elastic.Mixfile do
   def application do
     [
       extra_applications: [:logger],
-      mod: {Elastic.Application, []}
+      mod: {Flex.Application, []}
     ]
   end
 

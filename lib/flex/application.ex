@@ -1,4 +1,4 @@
-defmodule Elastic.Application do
+defmodule Flex.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   @moduledoc false
@@ -8,13 +8,13 @@ defmodule Elastic.Application do
   def start(_type, _args) do
     # List all child processes to be supervised
     children = [
-      # Starts a worker by calling: Elastic.Worker.start_link(arg)
-      # {Elastic.Worker, arg},
+      # Starts a worker by calling: Flex.Worker.start_link(arg)
+      # {Flex.Worker, arg},
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: Elastic.Supervisor]
+    opts = [strategy: :one_for_one, name: Flex.Supervisor]
     Supervisor.start_link(children, opts)
   end
 end

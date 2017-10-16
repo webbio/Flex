@@ -20,7 +20,7 @@ defmodule PostStage do
   end
 end
 
-defmodule Elastic.Document do
+defmodule Flex.Document do
   def bulk_index(index, schema, repo) do
     {:ok, stage} = PostStage.start_link(0)
     stage
@@ -35,7 +35,7 @@ defmodule Elastic.Document do
       end)
     end)
     |> Flow.each_state(fn bulk ->
-      Elastic.HTTP.post "/#{index}/#{index}/_bulk", bulk
+      Flex.HTTP.post "/#{index}/#{index}/_bulk", bulk
     end)
     |> Flow.run
   end
