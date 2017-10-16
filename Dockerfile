@@ -8,13 +8,14 @@ RUN apk add --update \
     git \
     make \
     alpine-sdk \
-
- && mix local.hex --force \
- && mix local.rebar --force
+    && mix local.hex --force \
+    && mix local.rebar --force
+ 
+RUN export ERL_AFLAGS="-kernel shell_history enabled"
 
 WORKDIR /usr/src/app
 
 COPY . /usr/src/app
 RUN mix do deps.get --only $MIX_ENV, deps.compile
 
-CMD ["iex"]
+CMD ["iex -S mix"]
