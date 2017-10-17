@@ -19,19 +19,11 @@ defmodule Flex.Mapper.Struct do
   end
   
   @doc false
-  defp fetch(data, field) when is_atom(field) do
-    if field in Map.keys(data) do
-      {field, Map.get(data, field)}
-    else
-      {field, apply(data.__struct__, field, [data])}
-    end
-  end
-  defp fetch(data, {key, field}) when is_atom(field) do
-    if field in Map.keys(data) do
-      {key, Map.get(data, field)}
-    else
-      {key, apply(data.__struct__, field, [data])}
-    end
-  end
-  defp fetch(data, {key, field}), do: {key, field}
+  defp fetch(data, field)        when is_atom(field), do: fetch(data, field, field in Map.keys(data))    
+  defp fetch(data, {key, field}) when is_atom(field), do: fetch(data, {key, field}, field in Map.keys(data))    
+  defp fetch(_, {key, field}),                        do: {key, field}
+  defp fetch(data, field, true)  when is_atom(field), do: {field, Map.get(data, field)}    
+  defp fetch(data, field, false) when is_atom(field), do: {field, apply(data.__struct__, field, [data])}    
+  defp fetch(data, {key, field}, true),               do: {key, Map.get(data, field)}    
+  defp fetch(data, {key, field}, false),              do: {key, apply(data.__struct__, field, [data])}    
 end

@@ -70,3 +70,4 @@ defmodule Flex.MapperTest do
              author_bio: "bio"} = mod |> struct(data) |> mod.to_doc
   end
 end
+
