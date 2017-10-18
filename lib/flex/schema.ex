@@ -10,8 +10,9 @@ defmodule Flex.Schema do
       
       import Schema
       
-      @flex_config %{fields: %{}, mappings: %{}, settings: %{}}
-      def flex_mappings,  do: flex_config().mappings
+      @flex_config %{mappings: %{}, settings: %{}}
+      Module.register_attribute(__MODULE__, :flex_schema, accumulate: true)
+      # def flex_mappings,  do: flex_config() |> flex_mappings()
       def flex_settings,  do: flex_config().settings
       def flex_fields(_), do: flex_config().fields |> Map.keys
     end
@@ -27,6 +28,7 @@ defmodule Flex.Schema do
     quote do
       unquote(block)
       def flex_config(), do: @flex_config
+      def flex_mappings(), do: flex_mappings(@flex_schema)
     end
   end
   
@@ -40,9 +42,7 @@ defmodule Flex.Schema do
   
   defmacro flex_field(name, type, opts \\ []) do
     quote do
-      flex_config = @flex_config 
-      |> deep_merge(%{fields: %{unquote(name) => %{type: unquote(type), opts: unquote(opts)}}})
-      Module.put_attribute(__MODULE__, :flex_config, flex_config)
+      Module.put_attribute(__MODULE__, :flex_schema, {unquote(name), unquote(type), unquote(opts)})
     end
   end
   
@@ -53,6 +53,55 @@ defmodule Flex.Schema do
       Module.put_attribute(__MODULE__, :flex_config, flex_config)
     end
   end
+  
+  def flex_mappings(fields) do
+    for {name, _, _} = field <- fields, into: %{}, do: {name, flex_mapping(field)}
+  end
+  
+  def flex_mapping({_, type, opts}), do: flex_mapping(%{type: type}, opts)
+  def flex_mapping(field, [{option, [value | tl]} | opts]) do
+    option
+    |> handle_mapping_option(field, value)
+    |> flex_mapping([{option, tl} | opts])
+  end
+  def flex_mapping(field, [{option, []} | opts]), do: flex_mapping(field, opts)
+  def flex_mapping(field, [{option, analyzer} | opts]), do: flex_mapping(field, [{option, [analyzer]} | opts])
+  def flex_mapping(field, [[] | opts]), do: flex_mapping(field, opts)
+  def flex_mapping(field, []), do: field
+  
+  def handle_mapping_option(:analyzer, field, analyzer) do
+    field 
+    |> deep_merge(%{fields: %{analyzer => %{type: field.type, analyzer: analyzer}}})
+  end
+  
+  
+  # def flex_mappings([field | tl]) do
+  #   flex_mapping(field) ++ flex_mappings(tl)
+  # end
+  # def flex_mapping(%{analyzer: analyzer} = field) when not is_nil(analyzer) do
+  #    field 
+  #    |> flex_mapping(%{opts: %{analyzers: [analyzer], analyzer: nil}})
+  # end
+  # def flex_mapping(%{analyzers: [analyzer | tl]} = field) do
+  #   field 
+  #   |> flex_mapping(%{fields: %{analyzer => %{type: field.type, analyzer: analyzer}}, opts: %{analyzers: tl}})
+  # end
+  # def flex_mapping(%{analyzers: [analyzer]} = field) do
+  #   field
+  #   |> flex_mapping(%{fields: %{analyzer => %{type: field.type, analyzer: analyzer}}})
+  # end
+  # def flex_mapping(%{analyzers: []} = field) do
+  #   field
+  #   |> flex_mapping(%{fields: %{raw: %{type: "keyword", analyzer: analyzer}}})
+  # end
+  # def flex_mapping(field, merge), do: field |> deep_merge(merge) |> flex_mapping()
+  # def flex_mapping(field), do: field
+  #   
+  # 
+  # def flex_mapping_fields(type, %{analyzers: [_|_]}) do
+  #   flex_mapping_fields(type, %{}) ++ for analyzer <- opts.analyzers, into: %{}, do:
+  #     
+  # end
   
   @doc """
   Perform a deep merge of two maps
