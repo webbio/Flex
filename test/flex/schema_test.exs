@@ -40,7 +40,7 @@ defmodule Flex.SchemaTest do
     
     use Schema
     
-    flex do
+    flex "books" do
       field :name, :text, analyzer: :flex_word_start
       field :release_year, :integer
     end

@@ -12,8 +12,10 @@ defmodule Flex.HTTP do
   end
 
   def process_request_body(body) when is_map(body) or is_list(body) do
-    body
+    b = body
     |> Poison.encode!
+    IO.inspect(b)
+    b
   end
   def process_request_body(body), do: body
 

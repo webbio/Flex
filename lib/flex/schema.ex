@@ -60,7 +60,7 @@ defmodule Flex.Schema do
       @flex_mappings unquote(mappings)
       
       def flex_fields(_),  do: @flex_fields
-      def flex_mappings(), do: @flex_mappings
+      def flex_mappings(), do: %{properties: @flex_mappings}
       def flex_name(),     do: @flex_name
       def flex_settings,   do: @flex_settings
     end

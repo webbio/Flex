@@ -3,8 +3,12 @@ defmodule Flex.Index do
   This module provides an interface for working with indexes
   """
   alias Flex.API
-
-#  def all(index), do: [index, "_search"] |> make_path |> HTTP.post(%{query: %{match_all: %{}}})
+  
+  def analyze(index, analyzer, text), do: [index, "_analyze"] |> make_path |> API.post(%{analyzer: analyzer, text: text})
+  
+  def search(index, query), do: [index, "_search"] |> make_path |> API.post(%{query: query})
+  
+  def all(index), do: [index, "_search"] |> make_path |> API.post(%{query: %{match_all: %{}}})
 
   @doc """
   Get information about an index
@@ -75,6 +79,10 @@ defmodule Flex.Index do
   def delete(index) do
     index |> make_path |> API.delete
   end
+  
+  def delete_all, do: delete "*"
+  
+  def refresh(index), do: [index, "_refresh"] |> make_path() |> API.post()
 
   @doc false
   defp make_path(parts) when is_list(parts), do: "/" <> Enum.join(parts, "/")

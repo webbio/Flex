@@ -3,7 +3,7 @@ defmodule Flex.Mixfile do
 
   def project do
     [
-      app: :elastic,
+      app: :flex,
       version: "0.1.0",
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env),
@@ -16,12 +16,15 @@ defmodule Flex.Mixfile do
   def application do
     [
       extra_applications: [:logger],
-      mod: {Flex.Application, []}
+      mod: mod(Mix.env)
     ]
   end
   
-  defp elixirc_paths(:test), do: ["lib", "test/dummy"]
+  defp elixirc_paths(:test), do: ["lib", "test/dummy", "test/support"]
   defp elixirc_paths(_),     do: ["lib"]
+  
+  defp mod(:test), do: {Flex.Dummy.Application, []}
+  defp mod(_), do: {}
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
@@ -31,7 +34,10 @@ defmodule Flex.Mixfile do
       {:plug, "~> 1.4.3"},
       {:flow, "~> 0.11"},
       {:ecto, "~> 2.2.4"},
-      {:inflex, "~> 1.9.0"}
+      {:inflex, "~> 1.9.0"},
+      {:phoenix, "~> 1.3.0", only: [:dev, :test]},
+      {:ex_machina, "~> 2.1", only: :test},
+      {:postgrex, "~> 0.13.0", only: :test},
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
     ]
