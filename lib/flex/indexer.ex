@@ -81,7 +81,7 @@ defmodule Flex.Indexer do
   
   defp postfix_with_timestamp(name) do
     DateTime.utc_now()
-    |> DateTime.to_unix 
+    |> DateTime.to_unix(:microsecond)
     |> to_string()
     |> List.wrap()
     |> List.insert_at(0, name)
