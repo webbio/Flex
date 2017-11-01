@@ -9,6 +9,36 @@ defmodule Flex.Index do
   def search(index, query), do: [index, "_search"] |> make_path |> API.post(%{query: query})
   
   def all(index), do: [index, "_search"] |> make_path |> API.post(%{query: %{match_all: %{}}})
+  
+  def close(index), do: [index, "_close"] |> make_path |> API.post
+  def open(index), do: [index, "_open"] |> make_path |> API.post
+  def reindex(index), do: [index, "_update_by_query?pretty&refresh&conflicts=proceed"] |> make_path |> API.post
+  
+  def aliases(actions), do: ["_aliases"] |> make_path |> API.post(%{"actions" => actions})
+  
+  def rotate_to(index, new_index) do
+    with {:ok, old_index} <- index |> current_alias()
+    do
+      aliases [
+        %{add: %{index: new_index, alias: index}},
+        %{remove_index: %{index: old_index}},
+      ]
+      refresh(index)
+    else
+      err -> err
+    end    
+  end
+  
+  def current_alias(index) do
+    with {:ok, info} <- index |> info()
+    do
+      {:ok, info 
+      |> Map.keys() 
+      |> List.first()}
+    else
+      err -> err
+    end
+  end
 
   @doc """
   Get information about an index

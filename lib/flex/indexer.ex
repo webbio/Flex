@@ -1,13 +1,38 @@
 defmodule Flex.Indexer do
-  alias Flex.{API, Index}
+  alias Flex.{API, Index, Mapping, Setting}
   
   def index([doc | _] = docs), do: index(docs, doc.__struct__.flex_schema())
   def index(docs, schema) do
     {:ok, info} = create_aliased_index(schema)
     index_name = info |> Map.keys() |> List.first()
-    IO.inspect(index_name)
     bulk_index(docs, index_name, schema)
     Index.refresh(index_name)
+  end
+  
+  def reindex(schema) do
+    with {:ok, info} <- schema.flex_name() |> Index.info(), 
+         index <- info |> Map.keys() |> List.first(),
+         {:ok, _} <- index |> Index.close(),
+         {:ok, _} <- index |> Setting.put(schema.flex_settings()),
+         {:ok, _} <- index |> Index.open(),
+         {:ok, _} <- index |> Mapping.put(schema.flex_mappings())
+    do
+      index |> Index.reindex()
+    else
+      err -> err
+    end
+  end
+  
+  def rebuild([doc | _] = docs), do: rebuild(docs, doc.__struct__.flex_schema())
+  def rebuild(docs, schema) do
+    with index_name <- schema.flex_name() |> postfix_with_timestamp(),
+         {:ok, _} <- index_name |> Index.create(),
+         _ <- docs |> bulk_index(index_name, schema)
+    do
+      schema.flex_name() |> Index.rotate_to(index_name)
+    else
+      err -> err
+    end
   end
   
   def create_aliased_index(schema) do

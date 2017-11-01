@@ -22,7 +22,7 @@ defmodule Flex.API do
     do
       {:ok, body}
     else
-      # {:ok, %{body: %{"error" => %{"type" => error_type}}}} -> {:error, String.to_atom(error_type)}
+      {:ok, %{body: %{"error" => %{"type" => error_type}}}} -> {:error, String.to_atom(error_type)}
       {:ok, %{status_code: 404}} -> {:error, :not_found}
       err -> err
     end

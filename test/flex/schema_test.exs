@@ -5,17 +5,19 @@ defmodule Flex.SchemaTest do
   
   @fields_fixture [:name, :release_year]
   @mappings_fixture %{
-    name: %{
-      fields: %{
-        flex_word_start: %{
-          analyzer: :flex_word_start,
-          type: :text
-        }
-      }, 
-      type: :text
-    },
-    release_year: %{
-      type: :integer
+    properties: %{
+      name: %{
+        fields: %{
+          flex_word_start: %{
+            analyzer: :flex_word_start,
+            type: :text
+          }
+        }, 
+        type: :text
+      },
+      release_year: %{
+        type: :integer
+      }
     }
   }
   @settings_fixture  %{
