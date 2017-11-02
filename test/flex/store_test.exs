@@ -8,7 +8,7 @@ defmodule Flex.StoreTest do
 
   describe "The Flex Store" do
     @tag :store
-    test "Store inserts a document with Ecto and Elastic in a transaction" do
+    test "insert a document with Ecto and Elastic in a transaction" do
       {:ok, book} = %Book{}
       |> Book.changeset(@book_attrs)
       |> Store.insert(Repo)
@@ -30,6 +30,32 @@ defmodule Flex.StoreTest do
       
       assert Repo.all(Book) == []
       assert {:ok, %{"hits" => %{"hits" => []}}} = Index.all("books")
+    end
+    
+    @tag :store
+    test "update a document with Ecto and Elastic in a transaction" do
+      {:ok, book} = %Book{}
+      |> Book.changeset(@book_attrs)
+      |> Store.insert(Repo)
+      
+      {:ok, book} = book
+      |> Book.changeset(%{name: "Programming Elixir 1.5"})
+      |> Store.update(Repo)
+      
+      assert_is_same_book Repo.get!(Book, book.id), Document.get("books", book.id)
+    end
+    
+    @tag :store
+    test "delete a document with Ecto and Elastic in a transaction" do
+      {:ok, book} = %Book{}
+      |> Book.changeset(@book_attrs)
+      |> Store.insert(Repo)
+      
+      {:ok, book} = book
+      |> Store.delete(Repo)
+      
+      refute Repo.get(Book, book.id)
+      assert {:error, :not_found} = Document.get("books", book.id)
     end
   end
   
