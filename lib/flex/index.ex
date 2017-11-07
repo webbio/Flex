@@ -6,7 +6,7 @@ defmodule Flex.Index do
   
   def analyze(index, analyzer, text), do: [index, "_analyze"] |> make_path |> API.post(%{analyzer: analyzer, text: text})
   
-  def search(index, query), do: [index, "_search"] |> make_path |> API.post(%{query: query})
+  def search(index, query), do: [index, "_search"] |> make_path |> API.post(query)
   
   def all(index), do: [index, "_search"] |> make_path |> API.post(%{query: %{match_all: %{}}})
   
@@ -110,6 +110,19 @@ defmodule Flex.Index do
     index |> make_path |> API.delete
   end
   
+  @doc """
+  Deletes all indexes
+  
+  ## Examples
+      
+      iex> Flex.index.create "foo"
+      ...> Flex.index.create "bar"
+      ...> {Flex.Index.exists?("foo"), Flex.Index.exists?("bar")}
+      {true, true}
+      iex> Flex.Index.delete_all()
+      ...> {Flex.Index.exists?("foo"), Flex.Index.exists?("bar")}
+      {false, false}
+  """
   def delete_all, do: delete "*"
   
   def refresh(index), do: [index, "_refresh"] |> make_path() |> API.post()

@@ -26,7 +26,7 @@ defmodule Flex.Indexer do
   def rebuild([doc | _] = docs), do: rebuild(docs, doc.__struct__.flex_schema())
   def rebuild(docs, schema) do
     with index_name <- schema.flex_name() |> postfix_with_timestamp(),
-         {:ok, _} <- index_name |> Index.create(),
+         {:ok, _} <- index_name |> Index.create(%{settings: schema.flex_settings(), mappings: %{index_name => schema.flex_mappings()}}),
          _ <- docs |> bulk_index(index_name, schema)
     do
       schema.flex_name() |> Index.rotate_to(index_name)

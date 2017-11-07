@@ -24,7 +24,7 @@ defmodule Flex.Mixfile do
   defp elixirc_paths(_),     do: ["lib"]
   
   defp mod(:test), do: {Flex.Dummy.Application, []}
-  defp mod(_), do: {}
+  defp mod(_), do: []
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
@@ -34,12 +34,9 @@ defmodule Flex.Mixfile do
       {:plug, "~> 1.4.3"},
       {:flow, "~> 0.11"},
       {:ecto, "~> 2.2.4"},
-      {:inflex, "~> 1.9.0"},
       {:phoenix, "~> 1.3.0", only: [:dev, :test]},
       {:ex_machina, "~> 2.1", only: :test},
       {:postgrex, "~> 0.13.0", only: :test},
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
     ]
   end
 end

@@ -4,6 +4,7 @@ defmodule Flex.API do
   """
 
   alias Flex.HTTP
+  require Logger
 
   def get(path), do: unwrap(:get, path)
   def head(path), do: unwrap(:head, path)
@@ -22,8 +23,10 @@ defmodule Flex.API do
     do
       {:ok, body}
     else
-      {:ok, %{body: %{"error" => %{"type" => error_type}}}} -> {:error, String.to_atom(error_type)}
       {:ok, %{status_code: 404}} -> {:error, :not_found}
+      {:ok, %{body: %{"error" => %{"type" => error_type}}} = err} -> 
+        Logger.warn("Elastic error: #{inspect err}")
+        {:error, String.to_atom(error_type)}
       err -> err
     end
   end
