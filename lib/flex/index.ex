@@ -39,9 +39,22 @@ defmodule Flex.Index do
       err -> err
     end
   end
-
+  
+  def current_alias!(index) do
+    with {:ok, current_alias} <- current_alias(index) 
+    do
+      current_alias
+    else
+      _ -> raise "index has no alias"
+    end
+  end
+  
   @doc """
   Get information about an index
+  
+  ## Elastic Docs
+  
+      https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-get-index.html
 
   ## Examples
 
@@ -57,6 +70,10 @@ defmodule Flex.Index do
 
   @doc """
   Create a new index
+  
+  ## Elastic Docs
+      
+      https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html
 
   ## Examples
 
@@ -74,6 +91,10 @@ defmodule Flex.Index do
 
   @doc """
   Checks if an index exists
+  
+  ## Elastic Docs
+  
+      https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-exists.html
 
   ## Examples
 
@@ -96,6 +117,10 @@ defmodule Flex.Index do
 
   @doc """
   Deletes an index
+  
+  ## Elastic Docs
+  
+      https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-delete-index.html
 
   ## Examples
 
@@ -124,6 +149,14 @@ defmodule Flex.Index do
       {false, false}
   """
   def delete_all, do: delete "*"
+  
+  @doc """
+  Refreshes an index
+  
+  ## Elastic Docs
+  
+      https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-refresh.html  
+  """
   
   def refresh(index), do: [index, "_refresh"] |> make_path() |> API.post()
 
