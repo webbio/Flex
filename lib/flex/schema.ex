@@ -12,13 +12,15 @@ defmodule Flex.Schema do
       Module.register_attribute(__MODULE__, :flex_schema, accumulate: true)
       
       alias Flex.Analyzers
-      import Schema
-      
+      import Schema      
     end
   end
   
   def parse_flex_field(name, type, opts \\ []), do: {name, type, opts}
   
+  def parse_flex_block({:timestamps, _type, _opts}, fields) do
+    {[{:field, [], [:inserted_at, :date]}, {:field, [], [:updated_at, :date]}], fields}
+  end
   def parse_flex_block({:field, type, opts}, fields) do
     field = apply(__MODULE__, :parse_flex_field, opts)
     {{:flex_field, type, opts}, [field] ++ fields}
@@ -63,6 +65,10 @@ defmodule Flex.Schema do
       def flex_mappings(), do: %{properties: @flex_mappings}
       def flex_name(),     do: @flex_name
       def flex_settings,   do: @flex_settings
+      def create_index do
+        Flex.Indexer.create_aliased_index(__MODULE__)
+        Flex.Indexer.rebuild([], __MODULE__)
+      end
     end
   end
   
