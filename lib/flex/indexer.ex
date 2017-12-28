@@ -63,8 +63,9 @@ defmodule Flex.Indexer do
         payload <> Poison.encode!(line) <> "\n"
       end)
     end)
-    |> Flow.each_state(fn bulk ->
-      API.post "/#{index_name}/#{index_name}/_bulk", bulk
+    |> Flow.each_state(fn 
+      "" -> true
+      bulk -> API.post "/#{index_name}/#{index_name}/_bulk", bulk
     end)
     |> Flow.run
   end
