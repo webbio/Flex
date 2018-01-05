@@ -50,22 +50,27 @@ defmodule Flex.Indexer do
     Index.info(schema.flex_name())
   end
   
-  defp bulk_index([], _, _), do: :ok
-  defp bulk_index(docs, index_name, schema) do
+  def bulk_index([], _, _), do: :ok
+  def bulk_index(docs, index_name, schema), do: bulk_index(docs, index_name, index_name, schema)
+  def bulk_index(docs, index_name, type_name, schema) when is_list(docs) do
     docs
     |> Flow.from_enumerable()
+    |> bulk_index(index_name, type_name, schema)
+  end
+  def bulk_index(flow, index_name, type_name, schema) do
+    flow
     |> Flow.map(fn doc ->
       [%{index: %{_id: doc.id}}, schema.to_doc(doc)]
     end)
     |> batch(500)
     |> Flow.map_state(fn lines ->
       Enum.reduce(lines, "", fn (line, payload) ->
-        payload <> Poison.encode!(line) <> "\n"
+        payload <> Jason.encode!(line) <> "\n"
       end)
     end)
     |> Flow.each_state(fn 
       "" -> true
-      bulk -> API.post "/#{index_name}/#{index_name}/_bulk", bulk
+      bulk -> API.post "/#{index_name}/#{type_name}/_bulk", bulk
     end)
     |> Flow.run
   end

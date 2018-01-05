@@ -34,6 +34,7 @@ defmodule Flex.Mixfile do
       {:plug, "~> 1.4.3"},
       {:flow, "~> 0.11"},
       {:ecto, "~> 2.2.4"},
+      {:jason, "~> 1.0.0-rc.1"},
       {:phoenix, "~> 1.3.0", only: [:dev, :test]},
       {:ex_machina, "~> 2.1", only: :test},
       {:postgrex, "~> 0.13.0", only: :test},
