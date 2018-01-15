@@ -4,7 +4,7 @@ defmodule Flex do
   """
 
   @doc false
-  def config, do: Application.get_all_env(:elastic)
+  def config, do: Application.get_all_env(:flex)
   @doc false
-  def config(key, default \\ nil), do: Application.get_env(:elastic, key, default)
+  def config(key, default \\ nil), do: Application.get_env(:flex, key, default)
 end

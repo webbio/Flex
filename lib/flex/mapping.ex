@@ -26,8 +26,9 @@ defmodule Flex.Mapping do
      iex> Flex.Mapping.get "elastic_test_index"
      {:ok, %{"properties" => %{ "name" => %{"type" => "text"}, "age" => %{"type" => "integer"} } }}
   """
-  def put(index, %{} = mappings) do
-    [index, :_mapping, index] |> make_path |> API.put(mappings)
+  def put(index, %{} = mappings), do: put(index, index, mappings)
+  def put(index, type, %{} = mappings) do
+    [index, :_mapping, type] |> make_path |> API.put(mappings)
   end
 
   @doc """

@@ -2,7 +2,7 @@ defmodule Flex.HTTP do
   use HTTPoison.Base
 
   def process_url(url) do
-    "http://elasticsearch:9200" <> url
+    Flex.config(:elastic_url) <> url
   end
 
   def process_response_body(""), do: ""
