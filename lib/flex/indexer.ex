@@ -65,7 +65,7 @@ defmodule Flex.Indexer do
     |> Flow.map(fn doc ->
       [%{index: %{_id: doc.id}}, schema.to_doc(doc)]
     end)
-    |> batch(Flex.config(:batch_size))
+    |> batch(Flex.config(:batch_size) |> String.to_integer)
     |> Flow.map_state(fn lines ->
       Enum.reduce(lines, "", fn (line, payload) ->
         payload <> Jason.encode!(line) <> "\n"
@@ -81,7 +81,7 @@ defmodule Flex.Indexer do
 
   def batch(flow, count) do
     flow
-    |> Flow.partition(window: Flow.Window.count(count), stages: Flex.config(:concurrency))
+    |> Flow.partition(window: Flow.Window.count(count), stages: Flex.config(:concurrency) |> String.to_integer)
     |> Flow.reduce(fn -> [] end, fn line, lines -> line ++ lines end)
   end
 
