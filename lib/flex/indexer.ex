@@ -65,7 +65,7 @@ defmodule Flex.Indexer do
     |> Flow.map(fn doc ->
       [%{index: %{_id: doc.id}}, schema.to_doc(doc)]
     end)
-    |> batch(500)
+    |> batch(Flex.config(:batch_size))
     |> Flow.map_state(fn lines ->
       Enum.reduce(lines, "", fn (line, payload) ->
         payload <> Jason.encode!(line) <> "\n"
@@ -74,14 +74,14 @@ defmodule Flex.Indexer do
     |> Flow.each_state(fn
       "" -> true
       bulk ->
-        API.post "/#{index_name}/#{type_name}/_bulk", bulk
+        {:ok, body} = API.post("/#{index_name}/#{type_name}/_bulk", bulk)
     end)
     |> Flow.run
   end
 
   def batch(flow, count) do
     flow
-    |> Flow.partition(window: Flow.Window.count(count))
+    |> Flow.partition(window: Flow.Window.count(count), stages: Flex.config(:concurrency))
     |> Flow.reduce(fn -> [] end, fn line, lines -> line ++ lines end)
   end
 

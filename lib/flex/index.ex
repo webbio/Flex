@@ -3,19 +3,24 @@ defmodule Flex.Index do
   This module provides an interface for working with indexes
   """
   alias Flex.API
-  
+
   def analyze(index, analyzer, text), do: [index, "_analyze"] |> make_path |> API.post(%{analyzer: analyzer, text: text})
-  
+
   def search(index, query), do: [index, "_search"] |> make_path |> API.post(query)
-  
+
   def all(index), do: [index, "_search"] |> make_path |> API.post(%{query: %{match_all: %{}}})
-  
+
+  def forcemerge(index), do: [index, "_forcemerge?max_num_segments=5"] |> make_path |> API.post
+
+  def find(index, id), do: find(index, index, id)
+  def find(index, type, id), do: [index, type, id, "_source"] |> make_path |> API.get
+
   def close(index), do: [index, "_close"] |> make_path |> API.post
   def open(index), do: [index, "_open"] |> make_path |> API.post
   def reindex(index), do: [index, "_update_by_query?pretty&refresh&conflicts=proceed"] |> make_path |> API.post
-  
+
   def aliases(actions), do: ["_aliases"] |> make_path |> API.post(%{"actions" => actions})
-  
+
   def rotate_to(index, new_index) do
     with {:ok, old_index} <- index |> current_alias()
     do
@@ -26,34 +31,34 @@ defmodule Flex.Index do
       refresh(index)
     else
       err -> err
-    end    
+    end
   end
-  
+
   def current_alias(index) do
     with {:ok, info} <- index |> info()
     do
-      {:ok, info 
-      |> Map.keys() 
+      {:ok, info
+      |> Map.keys()
       |> List.first()}
     else
       err -> err
     end
   end
-  
+
   def current_alias!(index) do
-    with {:ok, current_alias} <- current_alias(index) 
+    with {:ok, current_alias} <- current_alias(index)
     do
       current_alias
     else
       _ -> raise "index has no alias"
     end
   end
-  
+
   @doc """
   Get information about an index
-  
+
   ## Elastic Docs
-  
+
       https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-get-index.html
 
   ## Examples
@@ -70,9 +75,9 @@ defmodule Flex.Index do
 
   @doc """
   Create a new index
-  
+
   ## Elastic Docs
-      
+
       https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html
 
   ## Examples
@@ -91,9 +96,9 @@ defmodule Flex.Index do
 
   @doc """
   Checks if an index exists
-  
+
   ## Elastic Docs
-  
+
       https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-exists.html
 
   ## Examples
@@ -117,9 +122,9 @@ defmodule Flex.Index do
 
   @doc """
   Deletes an index
-  
+
   ## Elastic Docs
-  
+
       https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-delete-index.html
 
   ## Examples
@@ -134,12 +139,12 @@ defmodule Flex.Index do
   def delete(index) do
     index |> make_path |> API.delete
   end
-  
+
   @doc """
   Deletes all indexes
-  
+
   ## Examples
-      
+
       iex> Flex.index.create "foo"
       ...> Flex.index.create "bar"
       ...> {Flex.Index.exists?("foo"), Flex.Index.exists?("bar")}
@@ -149,15 +154,15 @@ defmodule Flex.Index do
       {false, false}
   """
   def delete_all, do: delete "*"
-  
+
   @doc """
   Refreshes an index
-  
+
   ## Elastic Docs
-  
-      https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-refresh.html  
+
+      https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-refresh.html
   """
-  
+
   def refresh(index), do: [index, "_refresh"] |> make_path() |> API.post()
 
   @doc false

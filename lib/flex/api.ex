@@ -19,12 +19,12 @@ defmodule Flex.API do
 
   @doc false
   defp unwrap(action, path, data \\ %{}) do
-    with {:ok, %{body: body, status_code: 200}} <- apply(HTTP, action, [path, data])
+    with {:ok, %{body: body, status_code: 200}} <- HTTP.request(action, path, data, [], [timeout: 100_000, recv_timeout: 100_000])
     do
       {:ok, body}
     else
       {:ok, %{status_code: 404}} -> {:error, :not_found}
-      {:ok, %{body: %{"error" => %{"type" => error_type}}} = err} -> 
+      {:ok, %{body: %{"error" => %{"type" => error_type}}} = err} ->
         Logger.warn("Elastic error: #{inspect err}")
         {:error, String.to_atom(error_type)}
       err -> err
