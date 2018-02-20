@@ -26,16 +26,22 @@ defmodule Flex.Index do
 
   def rotate_to(index, new_index) do
     with {:ok, old_index} <- index |> current_alias() do
-      aliases([
-        %{add: %{index: new_index, alias: index}},
-        %{remove: %{index: old_index, alias: index}}
-      ])
-
-      delete(old_index)
-      refresh(index)
+      rotate_to(index, new_index, old_index)
     else
       err -> err
     end
+  end
+
+  def rotate_to(index, new_index, new_index), do: refresh(index)
+
+  def rotate_to(index, new_index, old_index) do
+    aliases([
+      %{add: %{index: new_index, alias: index}},
+      %{remove: %{index: old_index, alias: index}}
+    ])
+
+    delete(old_index)
+    refresh(index)
   end
 
   def current_alias(index) do
