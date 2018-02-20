@@ -4,30 +4,34 @@ defmodule Flex.Index do
   """
   alias Flex.API
 
-  def analyze(index, analyzer, text), do: [index, "_analyze"] |> make_path |> API.post(%{analyzer: analyzer, text: text})
+  def analyze(index, analyzer, text),
+    do: [index, "_analyze"] |> make_path |> API.post(%{analyzer: analyzer, text: text})
 
   def search(index, query), do: [index, "_search"] |> make_path |> API.post(query)
 
   def all(index), do: [index, "_search"] |> make_path |> API.post(%{query: %{match_all: %{}}})
 
-  def forcemerge(index), do: [index, "_forcemerge?max_num_segments=5"] |> make_path |> API.post
+  def forcemerge(index), do: [index, "_forcemerge?max_num_segments=5"] |> make_path |> API.post()
 
   def find(index, id), do: find(index, index, id)
-  def find(index, type, id), do: [index, type, id, "_source"] |> make_path |> API.get
+  def find(index, type, id), do: [index, type, id, "_source"] |> make_path |> API.get()
 
-  def close(index), do: [index, "_close"] |> make_path |> API.post
-  def open(index), do: [index, "_open"] |> make_path |> API.post
-  def reindex(index), do: [index, "_update_by_query?pretty&refresh&conflicts=proceed"] |> make_path |> API.post
+  def close(index), do: [index, "_close"] |> make_path |> API.post()
+  def open(index), do: [index, "_open"] |> make_path |> API.post()
+
+  def reindex(index),
+    do: [index, "_update_by_query?pretty&refresh&conflicts=proceed"] |> make_path |> API.post()
 
   def aliases(actions), do: ["_aliases"] |> make_path |> API.post(%{"actions" => actions})
 
   def rotate_to(index, new_index) do
-    with {:ok, old_index} <- index |> current_alias()
-    do
-      aliases [
+    with {:ok, old_index} <- index |> current_alias() do
+      aliases([
         %{add: %{index: new_index, alias: index}},
-        %{remove_index: %{index: old_index}},
-      ]
+        %{remove: %{index: old_index, alias: index}}
+      ])
+
+      delete(old_index)
       refresh(index)
     else
       err -> err
@@ -35,19 +39,18 @@ defmodule Flex.Index do
   end
 
   def current_alias(index) do
-    with {:ok, info} <- index |> info()
-    do
-      {:ok, info
-      |> Map.keys()
-      |> List.first()}
+    with {:ok, info} <- index |> info() do
+      {:ok,
+       info
+       |> Map.keys()
+       |> List.first()}
     else
       err -> err
     end
   end
 
   def current_alias!(index) do
-    with {:ok, current_alias} <- current_alias(index)
-    do
+    with {:ok, current_alias} <- current_alias(index) do
       current_alias
     else
       _ -> raise "index has no alias"
@@ -71,7 +74,7 @@ defmodule Flex.Index do
       ...> with %{"aliases" => _, "mappings" => _, "settings" => _} <- info, do: :passed
       :passed
   """
-  def info(index), do: index |> make_path |> API.get
+  def info(index), do: index |> make_path |> API.get()
 
   @doc """
   Create a new index
@@ -111,8 +114,7 @@ defmodule Flex.Index do
       {:ok, true}
   """
   def exists?(index) do
-    with {:ok, _} <- index |> make_path |> API.head
-    do
+    with {:ok, _} <- index |> make_path |> API.head() do
       {:ok, true}
     else
       {:error, :not_found} -> {:ok, false}
@@ -137,7 +139,7 @@ defmodule Flex.Index do
       {:ok, %{"acknowledged" => true}}
   """
   def delete(index) do
-    index |> make_path |> API.delete
+    index |> make_path |> API.delete()
   end
 
   @doc """
@@ -153,7 +155,7 @@ defmodule Flex.Index do
       ...> {Flex.Index.exists?("foo"), Flex.Index.exists?("bar")}
       {false, false}
   """
-  def delete_all, do: delete "*"
+  def delete_all, do: delete("*")
 
   @doc """
   Refreshes an index
