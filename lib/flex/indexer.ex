@@ -54,12 +54,22 @@ defmodule Flex.Indexer do
     do: create_aliased_index(schema, schema.flex_type() || schema.flex_name(), false)
 
   def create_aliased_index(schema, type, false) do
+    create_timestamped_index(schema, type, true)
+  end
+
+  def create_timestamped_index(schema), do: create_timestamped_index(schema, schema.flex_type())
+
+  def create_timestamped_index(schema, type, with_alias \\ false) do
     {name, aliases} = index_config(schema.flex_name())
+    options = %{settings: schema.flex_settings(), mappings: %{type => schema.flex_mappings()}}
+
+    if with_alias do
+      options = options |> Map.merge(aliases)
+    end
 
     Index.create(
       name,
-      %{settings: schema.flex_settings(), mappings: %{type => schema.flex_mappings()}}
-      |> Map.merge(aliases)
+      options
     )
 
     Index.info(schema.flex_name())
@@ -82,7 +92,7 @@ defmodule Flex.Indexer do
     |> Flow.map(fn doc ->
       [%{index: %{_id: doc.id}}, schema.to_doc(doc)]
     end)
-    |> batch(Flex.config(:batch_size) |> String.to_integer)
+    |> batch(500)
     |> Flow.map_state(fn lines ->
       Enum.reduce(lines, "", fn line, payload ->
         payload <> Jason.encode!(line) <> "\n"
@@ -93,14 +103,14 @@ defmodule Flex.Indexer do
         true
 
       bulk ->
-        API.post "/#{index_name}/#{type_name}/_bulk", bulk
+        API.post("/#{index_name}/#{type_name}/_bulk", bulk)
     end)
     |> Flow.run()
   end
 
   def batch(flow, count) do
     flow
-    |> Flow.partition(window: Flow.Window.count(count), stages: Flex.config(:concurrency) |> String.to_integer)
+    |> Flow.partition(window: Flow.Window.count(count))
     |> Flow.reduce(fn -> [] end, fn line, lines -> line ++ lines end)
   end
 
