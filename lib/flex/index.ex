@@ -34,6 +34,20 @@ defmodule Flex.Index do
 
   def rotate_to(index, new_index, new_index), do: refresh(index)
 
+  def stale(index) do
+    with {:ok, indexes} <- info("#{index}*"),
+         {:ok, current_alias} <- current_alias(index) do
+      (indexes |> Map.keys()) -- [current_alias]
+    else
+      err -> err
+    end
+  end
+
+  def delete_stale(index) do
+    stale(index)
+    |> Enum.map(&delete/1)
+  end
+
   def rotate_to(index, new_index, old_index) do
     aliases([
       %{add: %{index: new_index, alias: index}},
