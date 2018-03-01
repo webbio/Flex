@@ -11,6 +11,17 @@ defmodule Flex.Index do
 
   def all(index), do: [index, "_search"] |> make_path |> API.post(%{query: %{match_all: %{}}})
 
+  def scroll(index, type, query \\ %{size: 5_000, query: %{match_all: %{}}})
+
+  def scroll(index, type, query) when is_map(query) do
+    [index, type, "_search?scroll=10s&search_type=scan&fields="] |> make_path
+    |> API.post(query)
+  end
+
+  def scroll(scroll_id) do
+    ["_search", "scroll", "#{scroll_id}?scroll=10s"] |> make_path |> API.get()
+  end
+
   def forcemerge(index), do: [index, "_forcemerge?max_num_segments=5"] |> make_path |> API.post()
 
   def find(index, id), do: find(index, index, id)
@@ -34,6 +45,16 @@ defmodule Flex.Index do
 
   def rotate_to(index, new_index, new_index), do: refresh(index)
 
+  def rotate_to(index, new_index, old_index) do
+    aliases([
+      %{add: %{index: new_index, alias: index}},
+      %{remove: %{index: old_index, alias: index}}
+    ])
+
+    delete(old_index)
+    refresh(index)
+  end
+
   def stale(index) do
     with {:ok, indexes} <- info("#{index}*"),
          {:ok, current_alias} <- current_alias(index) do
@@ -46,16 +67,6 @@ defmodule Flex.Index do
   def delete_stale(index) do
     stale(index)
     |> Enum.map(&delete/1)
-  end
-
-  def rotate_to(index, new_index, old_index) do
-    aliases([
-      %{add: %{index: new_index, alias: index}},
-      %{remove: %{index: old_index, alias: index}}
-    ])
-
-    delete(old_index)
-    refresh(index)
   end
 
   def current_alias(index) do
