@@ -7,11 +7,21 @@ defmodule Flex.Index do
   def analyze(index, analyzer, text),
     do: [index, "_analyze"] |> make_path |> API.post(%{analyzer: analyzer, text: text})
 
-  def search(index, query), do: [index, "_search"] |> make_path |> API.post(query)
+  def search(index, query), do: search(index, index, query)
+  def search(index, type, query), do: [index, type, "_search"] |> make_path |> API.post(query)
+
+  def delete_by_query(index, query), do: delete_by_query(index, index, query)
+
+  def delete_by_query(index, type, query),
+    do: [index, type, "_query"] |> make_path |> API.delete(query)
 
   def all(index), do: [index, "_search"] |> make_path |> API.post(%{query: %{match_all: %{}}})
 
-  def scroll(index, type, query \\ %{size: 5_000, query: %{match_all: %{}}})
+  def scroll(
+        index,
+        type,
+        query \\ %{size: 5_000, query: %{match_all: %{}}}
+      )
 
   def scroll(index, type, query) when is_map(query) do
     [index, type, "_search?scroll=10s&search_type=scan&fields="] |> make_path
