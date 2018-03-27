@@ -113,7 +113,7 @@ defmodule Flex.Schema do
     end)
   end
 
-  def flex_mapping({_, type, opts}, meta), do: flex_mapping({%{type: type}, meta}, opts)
+  def flex_mapping({_, type, opts}, meta), do: flex_mapping({%{type: type, index: "not_analyzed"}, meta}, opts)
   def flex_mapping({field, meta}, [{option, [value | tl]} | opts]) do
     option
     |> handle_mapping_option({field, meta}, value)
