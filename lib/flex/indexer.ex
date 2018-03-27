@@ -27,11 +27,12 @@ defmodule Flex.Indexer do
 
   def rebuild(docs, schema) do
     with index_name <- schema.flex_name() |> postfix_with_timestamp(),
+         type_name <- schema.flex_type() || schema.flex_name(),
          {:ok, _} <-
            index_name
            |> Index.create(%{
              settings: schema.flex_settings(),
-             mappings: %{index_name => schema.flex_mappings()}
+             mappings: %{type_name => schema.flex_mappings()}
            }),
          _ <- docs |> bulk_index(index_name, schema) do
       schema.flex_name() |> Index.rotate_to(index_name)

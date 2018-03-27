@@ -15,6 +15,26 @@ defmodule Flex.Index do
   def delete_by_query(index, type, query),
     do: [index, type, "_query"] |> make_path |> API.delete(query)
 
+  def info(), do: API.get("")
+
+  def version() do
+    with {:ok, info} <- info() do
+      info |> version()
+    else
+      err -> err
+    end
+  end
+
+  def version(%{"version" => %{"number" => version}}), do: version
+
+  def version_as_float do
+    version()
+    |> String.split(".")
+    |> Enum.take(2)
+    |> Enum.join(".")
+    |> String.to_float()
+  end
+
   def all(index), do: [index, "_search"] |> make_path |> API.post(%{query: %{match_all: %{}}})
 
   def scroll(
