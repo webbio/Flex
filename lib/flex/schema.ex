@@ -71,7 +71,13 @@ defmodule Flex.Schema do
 
       def flex_mappings(), do: flex_mappings(@flex_mappings)
 
-      def flex_name(), do: @flex_name
+      def flex_name(), do: flex_name(@flex_name)
+
+      def flex_name(name_or_mfa) when is_tuple(name_or_mfa),
+        do: apply(elem(name_or_mfa, 0), elem(name_or_mfa, 1), elem(name_or_mfa, 2))
+
+      def flex_name(name_or_mfa), do: name_or_mfa
+
       def flex_type(), do: @flex_type
       def flex_settings, do: @flex_settings
 
