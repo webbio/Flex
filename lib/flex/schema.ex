@@ -130,7 +130,7 @@ defmodule Flex.Schema do
 
   def flex_mappings(mappings), do: mappings |> flex_mappings(Flex.Index.version_as_float())
 
-  def flex_mappings(mappings, version) when version >= 1.5,
+  def flex_mappings(mappings, version) when version >= 2,
     do: %{_all: %{enabled: false}, properties: mappings}
 
   def flex_mappings(mappings, _version),
