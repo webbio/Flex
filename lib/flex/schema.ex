@@ -169,7 +169,7 @@ defmodule Flex.Schema do
 
     field =
       field
-      |> deep_merge(%{fields: %{analyzer => %{type: field.type, analyzer: analyzer}}})
+      |> deep_merge(%{fields: %{keyword: %{type: keyword}, analyzer => %{type: field.type, analyzer: analyzer}}})
 
     {field, meta}
   end
