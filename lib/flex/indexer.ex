@@ -83,20 +83,36 @@ defmodule Flex.Indexer do
   # Ivy.Import.start_all; Ivy.PackageOffers.Process.start
 
   def bulk_index([], _, _), do: :ok
+
   def bulk_index(docs, index_name, schema), do: bulk_index(docs, index_name, index_name, schema)
 
-  def bulk_index(docs, index_name, type_name, schema) when is_list(docs) do
+  def bulk_index(docs, index_name, type_name, schema, opts \\ [])
+
+  def bulk_index(docs, index_name, type_name, schema, with_enum: true) when is_list(docs) do
+    bulk =
+      docs
+      |> Enum.flat_map(fn doc ->
+        [%{index: %{_id: doc.id}}, schema.to_doc(doc)]
+      end)
+      |> Enum.reduce("", fn line, payload ->
+        payload <> Jason.encode!(line) <> "\n"
+      end)
+
+    API.post("/#{index_name}/#{type_name}/_bulk", bulk)
+  end
+
+  def bulk_index(docs, index_name, type_name, schema, _opts) when is_list(docs) do
     docs
     |> Flow.from_enumerable()
     |> bulk_index(index_name, type_name, schema)
   end
 
-  def bulk_index(flow, index_name, type_name, schema) do
+  def bulk_index(flow, index_name, type_name, schema, _opts) do
     flow
     |> Flow.map(fn doc ->
       [%{index: %{_id: doc.id}}, schema.to_doc(doc)]
     end)
-    |> batch(Flex.config(:batch_size) |> String.to_integer())
+    |> batch(Flex.config(:batch_size, "250") |> String.to_integer())
     |> Flow.map_state(fn lines ->
       Enum.reduce(lines, "", fn line, payload ->
         payload <> Jason.encode!(line) <> "\n"
@@ -116,7 +132,12 @@ defmodule Flex.Indexer do
     flow
     |> Flow.partition(
       window: Flow.Window.count(count),
-      stages: Flex.config(:concurrency) |> String.to_integer()
+      stages:
+        Flex.config(
+          :concurrency,
+          :erlang.system_info(:logical_processors_available) |> Integer.to_string()
+        )
+        |> String.to_integer()
     )
     |> Flow.reduce(fn -> [] end, fn line, lines -> line ++ lines end)
   end

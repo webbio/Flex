@@ -67,6 +67,7 @@ defmodule Flex.Schema do
       @flex_fields unquote(fields)
       @flex_mappings unquote(mappings)
 
+      def flex_fields(), do: @flex_fields
       def flex_fields(_), do: @flex_fields
 
       def flex_mappings(), do: flex_mappings(@flex_mappings)
@@ -84,6 +85,10 @@ defmodule Flex.Schema do
       def create_index do
         Flex.Indexer.create_aliased_index(__MODULE__)
         Flex.Indexer.rebuild([], __MODULE__)
+      end
+
+      def bulk_index(docs) do
+        Flex.Indexer.bulk_index(docs, @flex_name, __MODULE__)
       end
     end
   end
