@@ -10,6 +10,9 @@ defmodule Flex.Index do
   def search(index, query), do: search(index, index, query)
   def search(index, type, query), do: [index, type, "_search"] |> make_path |> API.post(query)
 
+  def count(index, query), do: search(index, index, query)
+  def count(index, type, query), do: [index, type, "_count"] |> make_path |> API.post(query)
+
   def delete_by_query(index, query), do: delete_by_query(index, index, query)
 
   def delete_by_query(index, type, query),
