@@ -19,10 +19,10 @@ defmodule Flex.Mixfile do
       mod: mod(Mix.env)
     ]
   end
-  
+
   defp elixirc_paths(:test), do: ["lib", "test/dummy", "test/support"]
   defp elixirc_paths(_),     do: ["lib"]
-  
+
   defp mod(:test), do: {Flex.Dummy.Application, []}
   defp mod(_), do: []
 
@@ -31,7 +31,6 @@ defmodule Flex.Mixfile do
     [
       {:httpoison, "~> 0.13"},
       {:poison, "~> 3.1"},
-      {:plug, "~> 1.4.3"},
       {:flow, "~> 0.11"},
       {:ecto, "~> 2.2.4"},
       {:jason, "~> 1.0.0-rc.1"},
