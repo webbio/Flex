@@ -114,9 +114,9 @@ defmodule Flex.Indexer do
     end)
     |> batch(Flex.config(:batch_size, "250") |> String.to_integer())
     |> Flow.map_state(fn lines ->
-      Enum.reduce(lines, "", fn line, payload ->
+      {Enum.reduce(lines, "", fn line, payload ->
         payload <> Jason.encode!(line) <> "\n"
-      end)
+      end), []}
     end)
     |> Flow.each_state(fn
       "" ->
