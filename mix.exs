@@ -31,7 +31,7 @@ defmodule Flex.Mixfile do
     [
       {:httpoison, "~> 0.13"},
       {:poison, "~> 3.1"},
-      {:flow, "~> 0.11"},
+      {:flow, "~> 0.13.0"},
       {:ecto, "~> 2.2.4"},
       {:jason, "~> 1.0.0-rc.1"},
       {:phoenix, "~> 1.3.0", only: [:dev, :test]},
