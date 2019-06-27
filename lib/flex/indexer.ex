@@ -117,13 +117,13 @@ defmodule Flex.Indexer do
       {Enum.reduce(lines, "", fn line, payload ->
         payload <> Jason.encode!(line) <> "\n"
       end), []}
-    end)
-    |> Flow.on_trigger(fn
-      "" ->
-        {true, []}
-
-      bulk ->
-        {API.post("/#{index_name}/#{type_name}/_bulk", bulk), []}
+      |> (fn
+        "" ->
+          {true, []}
+  
+        bulk ->
+          {API.post("/#{index_name}/#{type_name}/_bulk", bulk), []}
+      end).()
     end)
     |> Flow.run()
   end
