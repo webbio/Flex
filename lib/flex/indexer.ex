@@ -113,17 +113,17 @@ defmodule Flex.Indexer do
       [%{index: %{_id: doc.id}}, schema.to_doc(doc)]
     end)
     |> batch(Flex.config(:batch_size, "250") |> String.to_integer())
-    |> Flow.on_trigger(fn lines ->
-      {Enum.reduce(lines, "", fn line, payload ->
+    |> Flow.map_state(fn lines ->
+      Enum.reduce(lines, "", fn line, payload ->
         payload <> Jason.encode!(line) <> "\n"
-      end), []}
-      |> (fn
-        "" ->
-          {true, []}
-  
-        bulk ->
-          {API.post("/#{index_name}/#{type_name}/_bulk", bulk), []}
-      end).()
+      end)
+    end)
+    |> Flow.each_state(fn
+      "" ->
+        true
+
+      bulk ->
+        API.post("/#{index_name}/#{type_name}/_bulk", bulk)
     end)
     |> Flow.run()
   end
