@@ -118,12 +118,12 @@ defmodule Flex.Indexer do
         payload <> Jason.encode!(line) <> "\n"
       end), []}
     end)
-    |> Flow.each_state(fn
+    |> Flow.on_trigger(fn
       "" ->
-        true
+        {true, []}
 
       bulk ->
-        API.post("/#{index_name}/#{type_name}/_bulk", bulk)
+        {API.post("/#{index_name}/#{type_name}/_bulk", bulk), []}
     end)
     |> Flow.run()
   end
