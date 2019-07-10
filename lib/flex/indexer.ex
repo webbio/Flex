@@ -67,11 +67,9 @@ defmodule Flex.Indexer do
 
   def create_timestamped_index(schema, type, with_alias \\ false) do
     {name, aliases} = index_config(schema.flex_name())
-    options = %{settings: schema.flex_settings(), mappings: %{type => schema.flex_mappings()}}
-
-    if with_alias do
-      options = options |> Map.merge(aliases)
-    end
+    options =
+      %{settings: schema.flex_settings(), mappings: %{type => schema.flex_mappings()}}
+      |> maybe_add_aliases(aliases, with_alias)
 
     Index.create(
       name,
@@ -158,5 +156,14 @@ defmodule Flex.Indexer do
     |> List.wrap()
     |> List.insert_at(0, name)
     |> Enum.join("_")
+  end
+
+  defp maybe_add_aliases(options, aliases, with_alias) do
+    case with_alias do
+      true ->
+        Map.merge(options, aliases)
+      false ->
+        options
+    end
   end
 end
