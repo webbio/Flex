@@ -42,10 +42,15 @@ defmodule Flex.Indexer do
   end
 
   def create_aliased_index(schema) do
-    with {:ok, exists?} <- Index.exists?(schema.flex_name()) do
-      create_aliased_index(schema, exists?)
-    else
-      err -> err
+    case Index.exists?(schema.flex_name()) do
+      {:ok, exists?} ->
+        create_aliased_index(schema, exists?)
+
+      {:error, :not_found} ->
+        create_aliased_index(schema, false)
+
+      err ->
+        err
     end
   end
 
