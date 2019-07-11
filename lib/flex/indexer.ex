@@ -160,10 +160,8 @@ defmodule Flex.Indexer do
 
   defp maybe_add_aliases(options, aliases, with_alias) do
     case with_alias do
-      true ->
-        Map.merge(options, aliases)
-      false ->
-        options
+      true -> Map.merge(options, aliases)
+      false -> options
     end
   end
 end
