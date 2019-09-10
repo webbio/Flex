@@ -85,17 +85,24 @@ defmodule Flex.Indexer do
   # Flex.Indexer.create_aliased_index(Ivy.PackageOffers.Schema)
   # Ivy.Import.start_all; Ivy.PackageOffers.Process.start
 
+  def bulk_update(docs, index_name, schema), do: bulk_index(docs, index_name, index_name, schema, true)
+
+  def bulk_update(flow, index_name, type_name, schema, _opts), do: bulk_index(flow, index_name, type_name, schema, [], true)
+
   def bulk_index([], _, _), do: :ok
 
-  def bulk_index(docs, index_name, schema), do: bulk_index(docs, index_name, index_name, schema)
+  def bulk_index(docs, index_name, schema), do: bulk_index(docs, index_name, index_name, schema, false)
 
-  def bulk_index(docs, index_name, type_name, schema, opts \\ [])
+  def bulk_index(docs, index_name, type_name, schema, opts \\ [], update? \\ false)
 
-  def bulk_index(docs, index_name, type_name, schema, with_enum: true) when is_list(docs) do
+  def bulk_index(docs, index_name, type_name, schema, [with_enum: true], update?) when is_list(docs) do
     bulk =
       docs
       |> Enum.flat_map(fn doc ->
-        [%{index: %{_id: doc.id}}, schema.to_doc(doc)]
+        case update? do
+          true  -> [%{update: %{_id: doc.id, _type: index_name, _index: index_name}}, %{doc: schema.to_doc(doc)}]
+          _     -> [%{index: %{_id: doc.id}}, %{doc: schema.to_doc(doc)}]
+        end
       end)
       |> Enum.reduce("", fn line, payload ->
         payload <> Jason.encode!(line) <> "\n"
@@ -104,16 +111,19 @@ defmodule Flex.Indexer do
     API.post("/#{index_name}/#{type_name}/_bulk", bulk)
   end
 
-  def bulk_index(docs, index_name, type_name, schema, _opts) when is_list(docs) do
+  def bulk_index(docs, index_name, type_name, schema, _opts, update?) when is_list(docs) do
     docs
     |> Flow.from_enumerable()
-    |> bulk_index(index_name, type_name, schema)
+    |> bulk_index(index_name, type_name, schema, update?)
   end
 
-  def bulk_index(flow, index_name, type_name, schema, _opts) do
+  def bulk_index(flow, index_name, type_name, schema, _opts, update?) do
     flow
     |> Flow.map(fn doc ->
-      [%{index: %{_id: doc.id}}, schema.to_doc(doc)]
+      case update? do
+        true  -> [%{update: %{_id: doc.id, _type: index_name, _index: index_name}}, %{doc: schema.to_doc(doc)}]
+        _     -> [%{index: %{_id: doc.id}}, schema.to_doc(doc)]
+      end
     end)
     |> batch(Flex.config(:batch_size, "250") |> String.to_integer())
     |> Flow.map_state(fn lines ->
