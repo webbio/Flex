@@ -141,6 +141,17 @@ defmodule Flex.Indexer do
     |> Flow.run()
   end
 
+  def delete([], _), do: :ok
+
+  def delete(id, index_name) when is_integer(id), do: delete([id], index_name)
+
+  def delete(item_ids, index_name) do
+    item_ids
+    |> Enum.each(fn item_id ->
+      API.delete("/#{index_name}/#{index_name}/#{item_id}")
+    end)
+  end
+
   def batch(flow, count) do
     flow
     |> Flow.partition(
