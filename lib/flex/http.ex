@@ -7,8 +7,12 @@ defmodule Flex.HTTP do
 
   def process_response_body(""), do: ""
   def process_response_body(body) do
-    body
-    |> Poison.decode!
+    try do
+      body
+      |> Poison.decode!
+    rescue
+      _ -> body
+    end
   end
 
   def process_request_body(body) when is_map(body) or is_list(body) do

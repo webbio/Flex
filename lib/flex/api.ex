@@ -4,6 +4,7 @@ defmodule Flex.API do
   """
 
   alias Flex.HTTP
+  require HTTPoison.Retry
   require Logger
 
   def get(path), do: unwrap(:get, path)
@@ -29,7 +30,7 @@ defmodule Flex.API do
              headers,
              timeout: 100_000,
              recv_timeout: 100_000
-           ) do
+           ) |> HTTPoison.Retry.autoretry(max_attempts: 5, wait: 1_000, include_404s: false, retry_unknown_errors: false) do
       {:ok, body}
     else
       {:ok, %{status_code: 404}} ->

@@ -30,6 +30,7 @@ defmodule Flex.Mixfile do
   defp deps do
     [
       {:httpoison, "~> 0.13"},
+      {:httpoison_retry, "~> 1.0.0"},
       {:poison, "~> 3.1"},
       {:flow, "~> 0.13.0"},
       {:ecto, "~> 2.2.4"},
